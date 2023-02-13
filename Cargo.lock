@@ -7003,6 +7003,7 @@ dependencies = [
  "glob-match",
  "hex",
  "hostname",
+ "humantime",
  "indicatif",
  "itertools",
  "lazy_static",
