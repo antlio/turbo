@@ -24,7 +24,8 @@ pub mod webpack;
 
 use anyhow::Result;
 use chunk::{
-    EcmascriptChunkItem, EcmascriptChunkItemVc, EcmascriptChunkPlaceablesVc, EcmascriptChunkVc,
+    EcmascriptChunkContextVc, EcmascriptChunkItem, EcmascriptChunkItemVc,
+    EcmascriptChunkPlaceablesVc, EcmascriptChunkVc,
 };
 use code_gen::CodeGenerateableVc;
 use indexmap::IndexMap;
@@ -167,7 +168,16 @@ impl EcmascriptModuleAssetVc {
         context: ChunkingContextVc,
         runtime_entries: Option<EcmascriptChunkPlaceablesVc>,
     ) -> Result<ChunkVc> {
-        Ok(EcmascriptChunkVc::new_evaluate(context, self_vc.into(), runtime_entries).into())
+        let mut main_entries = vec![];
+        if let Some(runtime_entries) = runtime_entries {
+            main_entries.extend(runtime_entries.await?.iter().copied());
+        }
+        Ok(EcmascriptChunkVc::new_evaluated(
+            context,
+            self_vc.into(),
+            EcmascriptChunkPlaceablesVc::cell(main_entries),
+        )
+        .into())
     }
 
     #[turbo_tasks::function]
@@ -273,7 +283,7 @@ impl EcmascriptChunkPlaceable for EcmascriptModuleAsset {
     #[turbo_tasks::function]
     fn as_chunk_item(
         self_vc: EcmascriptModuleAssetVc,
-        context: ChunkingContextVc,
+        context: EcmascriptChunkContextVc,
     ) -> EcmascriptChunkItemVc {
         ModuleChunkItemVc::cell(ModuleChunkItem {
             module: self_vc,
@@ -319,7 +329,7 @@ impl ResolveOrigin for EcmascriptModuleAsset {
 #[turbo_tasks::value]
 struct ModuleChunkItem {
     module: EcmascriptModuleAssetVc,
-    context: ChunkingContextVc,
+    context: EcmascriptChunkContextVc,
 }
 
 #[turbo_tasks::value_impl]
@@ -338,7 +348,7 @@ impl ChunkItem for ModuleChunkItem {
 #[turbo_tasks::value_impl]
 impl EcmascriptChunkItem for ModuleChunkItem {
     #[turbo_tasks::function]
-    fn chunking_context(&self) -> ChunkingContextVc {
+    fn chunking_context(&self) -> EcmascriptChunkContextVc {
         self.context
     }
 
