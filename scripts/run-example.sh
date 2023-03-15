@@ -35,12 +35,6 @@ if [ -n "$1" ] && [ -n "$2" ]; then
 fi
 
 echo "No arguments provided, running all tests"
-
-if [[ $TURBO_TEST_EXAMPLE_PARALLEL = "true" ]]; then
-  echo "Running example tests in parallel"
-  .cram_env/bin/pip3 install --quiet pytest "prysk[pytest-plugin]" pytest-xdist
-  .cram_env/bin/pytest -n auto --prysk-shell="$(which bash)" "$PWD/examples_tests/"
-else
-  echo "Running example tests serially"
-  .cram_env/bin/prysk --shell="$(which bash)" "$PWD/examples_tests/"
-fi
+echo "Running example tests in parallel"
+.cram_env/bin/pip3 install --quiet pytest "prysk[pytest-plugin]" pytest-xdist
+.cram_env/bin/pytest -n auto --prysk-shell="$(which bash)" "$PWD/examples_tests/"
