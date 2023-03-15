@@ -9,6 +9,7 @@ export folder=$1
 export pkgManager=$2
 
 TEST_FILE="examples_tests/$2-$1.t"
+echo "hi"
 
 if [ -f "$TEST_FILE" ]; then
   echo "Running $TEST_FILE"
