@@ -44,6 +44,10 @@ elif [ "$pkgManager" == "yarn" ]; then
   yarn install > /dev/null
 fi
 
-# Delete .git directory if it's there, we'll set up a new git repo
+# Setup Git things (this is similar to integration_tests/setup_git.sh, but doesn't touch npm)
+# # Delete .git directory if it's there, we'll set up a new git repo
 [ ! -d .git ] || rm -rf .git
-"${SCRIPT_DIR}/../cli/integration_tests/setup_git.sh" "${TARGET_DIR}"
+git init "$TARGET_DIR" --quiet --initial-branch=main
+GIT_ARGS="--git-dir=${TARGET_DIR}/.git --work-tree=${TARGET_DIR}"
+git ${GIT_ARGS} config user.email "turbo-test@example.com"
+git ${GIT_ARGS} config user.name "Turbo Test"
